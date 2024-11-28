@@ -116,6 +116,7 @@ We’ll measure degree centrality, which indicates the number of connections eac
 
 Code for Centrality Analysis:
 
+```python
 # Calculate degree centrality
 degree_centrality = nx.degree_centrality(G)
 
@@ -128,10 +129,11 @@ print("Top 5 Central Nodes (with Degree Centrality):")
 for node, centrality in top_central_nodes:
     print(f"Node: {node}, Centrality: {centrality}")
 
+```
 Visualization:
 
 Highlight the top 5 central nodes in the graph.
-
+```python
 # Get the top 5 nodes
 top_nodes = [node for node, _ in top_central_nodes]
 
@@ -150,13 +152,14 @@ nx.draw(
 )
 plt.title("Network Graph Highlighting Central Nodes")
 plt.show()
+```
 
 2. Cluster Analysis
 
 For cluster detection, we use connected components and visualize each cluster with a distinct color.
 
 Code for Clusters:
-
+```python
 # Find connected components (clusters)
 clusters = list(nx.connected_components(G))
 
@@ -167,11 +170,11 @@ cluster_mapping = {node: i for i, cluster in enumerate(clusters) for node in clu
 cluster_colors = [cluster_mapping[node] for node in G.nodes]
 
 print("Clusters Found:", clusters)
-
+```
 Visualization:
 
 Each cluster is colored differently.
-
+```python
 # Draw graph with clusters
 plt.figure(figsize=(12, 10))
 nx.draw(
@@ -185,6 +188,7 @@ nx.draw(
 )
 plt.title("Network Graph with Clusters Highlighted")
 plt.show()
+```
 
 3. Outlier Analysis
 
@@ -192,6 +196,7 @@ We’ll visualize isolated nodes (nodes without any connections).
 
 Code for Isolated Nodes:
 
+```python
 # Find isolated nodes
 isolated_nodes = list(nx.isolates(G))
 print("Isolated Nodes:", isolated_nodes)
@@ -208,13 +213,13 @@ nx.draw(
 )
 plt.title("Network Graph Highlighting Isolated Nodes")
 plt.show()
-
+```
 4. Combine Clusters and Central Nodes
 
 To gain deeper insights, overlay cluster information with centrality (e.g., size of the node).
 
 Code for Combined Visualization:
-
+```python
 # Node size based on centrality
 centrality_sizes = [500 + degree_centrality[node] * 3000 for node in G.nodes]
 
@@ -234,6 +239,7 @@ nx.draw(
 )
 plt.title("Network Graph: Centrality and Clusters")
 plt.show()
+```
 
 5. Detailed Insights
 
@@ -253,6 +259,7 @@ c. Isolated Nodes:
 
 If you’d like to work further with these clusters and centrality metrics, you can export them as follows:
 
+```python
 # Export centrality
 centrality_df = pd.DataFrame(sorted_centrality, columns=["Node", "Centrality"])
 centrality_df.to_csv("centrality.csv", index=False)
@@ -262,5 +269,5 @@ cluster_df = pd.DataFrame([
     {"Node": node, "Cluster": cluster_mapping[node]} for node in G.nodes
 ])
 cluster_df.to_csv("clusters.csv", index=False)
-
+```
 Let me know if you’d like further assistance with this analysis!
