@@ -146,4 +146,138 @@ plt.show()
 
 ---
 
-These steps cover most of the analyses discussed earlier. Let me know if you’d like help with specific parts, or if you want to add further calculations or visualizations!
+-----------
+Here’s an expanded Python implementation to include the additional analyses you requested:
+
+---
+
+### **Unusual Age Patterns**
+#### Find Age Outliers:
+```python
+# Define unusual age thresholds
+min_age_threshold = 18  # Minimum age (e.g., for legal representation)
+max_age_threshold = 120  # Maximum realistic age
+
+# Identify unusual ages for primary and related parties
+unusual_age_pty = df[(df['PTY_AGE'] < min_age_threshold) | (df['PTY_AGE'] > max_age_threshold)]
+unusual_age_rel_pty = df[(df['REL_PTY_AGE'] < min_age_threshold) | (df['REL_PTY_AGE'] > max_age_threshold)]
+
+print(f"Unusual primary party ages: {unusual_age_pty.shape[0]}")
+print(f"Unusual related party ages: {unusual_age_rel_pty.shape[0]}")
+
+# Display some unusual age cases
+print(unusual_age_pty.head())
+print(unusual_age_rel_pty.head())
+```
+
+#### Visualize Unusual Age Patterns:
+```python
+# Highlight outliers with visualizations
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='variable', y='value', data=pd.melt(df[['PTY_AGE', 'REL_PTY_AGE']]), palette="Set2")
+plt.title('Boxplot of Primary and Related Party Ages')
+plt.xlabel('Party Type')
+plt.ylabel('Age')
+plt.show()
+```
+
+---
+
+### **Multiple Relationships**
+#### Find Parties with Multiple Relationships:
+```python
+# Count relationships by PTY_ID
+pty_relationship_counts = df.groupby('PTY_ID').size().reset_index(name='RELATIONSHIP_COUNT')
+
+# Identify parties with multiple relationships
+multiple_relationships = pty_relationship_counts[pty_relationship_counts['RELATIONSHIP_COUNT'] > 1]
+
+print(f"Number of parties with multiple relationships: {multiple_relationships.shape[0]}")
+print(multiple_relationships.head())
+
+# Merge back to the original dataframe for context
+df_multiple_relationships = df.merge(multiple_relationships, on='PTY_ID', how='inner')
+print(df_multiple_relationships.head())
+```
+
+---
+
+### **Age Compliance**
+#### Validate Legal Age for Attorneys:
+```python
+# Ensure related party meets legal age for attorneys
+min_legal_age = 18  # Legal age for being an attorney
+
+# Identify non-compliant cases
+age_compliance_issues = df[df['REL_PTY_AGE'] < min_legal_age]
+print(f"Non-compliant attorneys under legal age: {age_compliance_issues.shape[0]}")
+print(age_compliance_issues.head())
+```
+
+---
+
+### **Deceased Compliance**
+#### Check Relationships with Deceased Parties:
+```python
+# Identify cases where either party is deceased
+deceased_compliance_issues = df[(df['DSC_DATE'].notnull()) | (df['REL_PTY_DSD'].notnull())]
+
+# Investigate active relationships with deceased parties
+active_deceased_issues = deceased_compliance_issues[deceased_compliance_issues['RELATIONSHIP_DURATION'] > 0]
+
+print(f"Relationships with deceased parties: {deceased_compliance_issues.shape[0]}")
+print(f"Active relationships with deceased parties: {active_deceased_issues.shape[0]}")
+print(active_deceased_issues.head())
+```
+
+---
+
+### Summary Insights
+You can summarize all issues for reporting purposes:
+```python
+# Summary of all compliance issues
+summary = {
+    "Unusual Primary Party Ages": unusual_age_pty.shape[0],
+    "Unusual Related Party Ages": unusual_age_rel_pty.shape[0],
+    "Parties with Multiple Relationships": multiple_relationships.shape[0],
+    "Non-compliant Attorneys (Under Legal Age)": age_compliance_issues.shape[0],
+    "Relationships with Deceased Parties": deceased_compliance_issues.shape[0],
+    "Active Relationships with Deceased Parties": active_deceased_issues.shape[0],
+}
+
+# Print summary
+print(pd.DataFrame(summary.items(), columns=["Issue", "Count"]))
+```
+
+---
+
+### **Visualizations for Compliance and Trends**
+Use visuals to make your findings clear:
+#### Multiple Relationships Distribution:
+```python
+plt.figure(figsize=(10, 6))
+sns.histplot(pty_relationship_counts['RELATIONSHIP_COUNT'], bins=20, kde=True, color='skyblue')
+plt.title('Distribution of Relationship Counts per Party')
+plt.xlabel('Number of Relationships')
+plt.ylabel('Frequency')
+plt.show()
+```
+
+#### Deceased and Active Relationships:
+```python
+# Visualize relationship statuses for deceased parties
+plt.figure(figsize=(10, 6))
+sns.countplot(data=active_deceased_issues, x='IPR_TYP_NR', order=active_deceased_issues['IPR_TYP_NR'].value_counts().index, palette='Reds')
+plt.title('Active Relationships with Deceased Parties by Type')
+plt.xlabel('Relationship Type')
+plt.ylabel('Count')
+plt.show()
+```
+
+---
+
+### Next Steps
+These additional analyses will flag potential compliance issues and risk indicators:
+- Investigate flagged cases (e.g., deceased and active relationships, underage attorneys).
+- Use summaries and visualizations for reporting or further auditing steps.
+- Let me know if you want to refine or extend any of these analyses!
