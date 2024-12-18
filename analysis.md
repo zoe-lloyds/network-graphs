@@ -281,3 +281,64 @@ These additional analyses will flag potential compliance issues and risk indicat
 - Investigate flagged cases (e.g., deceased and active relationships, underage attorneys).
 - Use summaries and visualizations for reporting or further auditing steps.
 - Let me know if you want to refine or extend any of these analyses!
+
+
+```python
+import pandas as pd
+
+# Assuming df is your loaded DataFrame
+# Define thresholds for analysis
+min_age_threshold = 18  # Minimum legal age
+max_age_threshold = 120  # Maximum realistic age
+
+# Calculate age differences
+df['AGE_DIFF'] = abs(df['REL_PTY_AGE'] - df['PTY_AGE'])
+
+# 1. Age Flags
+# Unusual primary and related party ages
+unusual_age_pty = df[(df['PTY_AGE'] < min_age_threshold) | (df['PTY_AGE'] > max_age_threshold)]
+unusual_age_rel_pty = df[(df['REL_PTY_AGE'] < min_age_threshold) | (df['REL_PTY_AGE'] > max_age_threshold)]
+
+# Unusual age differences
+unusual_age_diff = df[df['AGE_DIFF'] > 50]  # Arbitrary threshold for large age differences
+
+# Minors as related parties or primary parties
+minor_related_parties = df[df['REL_PTY_AGE'] < min_age_threshold]
+minor_primary_parties = df[df['PTY_AGE'] < min_age_threshold]
+
+# Combine age flags into one CSV
+age_flags = pd.concat([
+    unusual_age_pty.assign(FLAG="Unusual PTY Age"),
+    unusual_age_rel_pty.assign(FLAG="Unusual REL PTY Age"),
+    unusual_age_diff.assign(FLAG="Unusual Age Difference"),
+    minor_related_parties.assign(FLAG="Minor Related Party"),
+    minor_primary_parties.assign(FLAG="Minor Primary Party")
+])
+
+age_flags.to_csv('age_flags.csv', index=False)
+
+# 2. Deceased Flags
+# Deceased primary parties and related parties
+deceased_primary = df[df['DSC_DATE'].notnull()]
+deceased_related = df[df['REL_PTY_DSD'].notnull()]
+
+# Save deceased flags
+deceased_primary.to_csv('deceased_primary.csv', index=False)
+deceased_related.to_csv('deceased_related.csv', index=False)
+
+# 3. Party ID Relationship Counts and Most Common Type
+# Relationship counts by PTY_ID
+pty_relationship_counts = df.groupby('PTY_ID').agg(
+    RELATIONSHIP_COUNT=('IPR_TYP_NR', 'size'),
+    MOST_COMMON_RELATIONSHIP=('IPR_TYP_NR', lambda x: x.mode().iloc[0] if not x.mode().empty else None)
+).reset_index()
+
+# Save relationship counts
+pty_relationship_counts.to_csv('pty_relationship_counts.csv', index=False)
+
+print("CSV files created:")
+print("- age_flags.csv")
+print("- deceased_primary.csv")
+print("- deceased_related.csv")
+print("- pty_relationship_counts.csv")
+```
