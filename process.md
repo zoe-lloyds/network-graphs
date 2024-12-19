@@ -59,8 +59,20 @@ plt.show()
      ```
    - Process chunks and aggregate results.
 
-### Notes:
-- If the process is too complex, visualize only the most common transitions or a subset of steps.
-- For a deeper dive, create smaller graphs for specific customer segments or timelines.
 
-Would you like assistance with one of these steps?
+```python
+from sklearn.model_selection import train_test_split
+
+# Group by REF and calculate frequency of msg_key (or other criteria)
+stratify_col = df.groupby('REF')['msg_key'].nunique()
+
+# Perform stratified sampling
+train_refs, sampled_refs = train_test_split(
+    df['REF'].drop_duplicates(),
+    test_size=0.01,  # Adjust proportion as needed
+    stratify=stratify_col,
+    random_state=42
+)
+sampled_df = df[df['REF'].isin(sampled_refs)]
+```
+
