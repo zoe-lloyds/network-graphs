@@ -342,3 +342,16 @@ print("- deceased_primary.csv")
 print("- deceased_related.csv")
 print("- pty_relationship_counts.csv")
 ```
+
+
+```
+# Generalize all variations of 'AssignmentRouteNameofPerson' to 'AssignmentRoute'
+df['msg_key'] = df['msg_key'].apply(
+    lambda x: 'AssignmentRoute' if re.match(r'^AssignmentRouteNameofPerson.*$', x) else x)
+
+# Generalize all variations of 'EmailReceiptSentToNameNameName' to 'EmailReceiptSent'
+df['msg_key'] = df['msg_key'].apply(
+    lambda x: 'Email receipt sent' if re.match(r'^Email receipt sent.*$', x) else x
+)
+```
+
